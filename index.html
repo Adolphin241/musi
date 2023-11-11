@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Musi to YouTube Playlist Converter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        function convertPlaylist(e) {
+            e.preventDefault();
+
+            const musiLink = document.getElementById('musiLinkInput').value;
+            const playlistCode = musiLink.split('/').pop();
+
+            fetch('/convert', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ code: playlistCode })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('result').textContent = 'No playlist was found with such ID';
+                } else {
+                    const convertedLink = document.createElement('a');
+                    convertedLink.href = data.youtubePlaylistUrl;
+                    convertedLink.textContent = 'Converted Playlist';
+                    convertedLink.target = '_blank';
+
+                    document.getElementById('result').innerHTML = '';
+                    document.getElementById('result').appendChild(convertedLink);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('result').textContent = 'An error occurred while converting the playlist.';
+            });
+        }
+    </script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="container max-w-md mx-auto p-8 bg-white rounded shadow">
+        <h1 class="text-xl font-bold mb-6 text-center">Musi to YouTube Playlist Converter</h1>
+        <form id="convertForm" onsubmit="convertPlaylist(event)" class="mb-4">
+            <div class="mb-4">
+                <input type="text" id="musiLinkInput" placeholder="Enter Musi playlist link" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Convert</button>
+        </form>
+        <div id="result" class="text-center"></div>
+    </div>
+</body>
+</html>
